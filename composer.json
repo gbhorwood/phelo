@@ -2,7 +2,8 @@
     "name": "ghorwood/phelo",
     "description": "An elo ranking system library for php.",
     "type": "library",
-    "keywords": ["elo", "games", "ranking"],
+    "keywords": ["elo", "games", "ranking", "rating", "chess"],
+    "homepage": "https://github.com/gbhorwood/phelo",
     "license": "MIT",
     "authors": [
         {
