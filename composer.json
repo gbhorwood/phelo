@@ -1,6 +1,7 @@
 {
     "name": "ghorwood/phelo",
     "description": "An elo ranking system library for php.",
+    "type": "library",
     "keywords": ["elo", "games", "ranking"],
     "license": "MIT",
     "authors": [
@@ -9,7 +10,6 @@
             "email": "ghorwood@cloverhitch.ca"
         }
     ],
-    "type": "project",
     "require": {
 		"php": ">=7.1"
     },
