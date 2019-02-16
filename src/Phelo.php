@@ -27,7 +27,7 @@ class Phelo
     public function __construct(int $k=30)
     {
         $this->k = $k;
-    }
+    } // __construct
 
 
     /**
@@ -44,7 +44,7 @@ class Phelo
             throw new \Exception("Elo must be positive");
         }
         $this->players[$player] = $elo;
-    }
+    } // __set
 
 
     /**
@@ -60,7 +60,7 @@ class Phelo
             throw new \Exception("Invalid player $player");
         }
         return $this->players[$player];
-    } // __get()
+    } // __get
 
 
     /**
@@ -71,7 +71,7 @@ class Phelo
     public function getAll():array
     {
         return $this->players;
-    }
+    } // getAll
 
 
     /**
@@ -86,7 +86,7 @@ class Phelo
     public function chance(string $winner, string $loser):float
     {
         return floatval(sprintf("%.2f", $this->chanceOutOfOne($winner, $loser) * 100));
-    }
+    } // chance
 
 
     /**
@@ -113,7 +113,7 @@ class Phelo
         $this->players[$winner] = round($this->players[$winner] + $this->k * (1 - $this->chanceOutOfOne($winner, $loser)));
         $this->players[$loser] = round($this->players[$loser] + $this->k*(0 - $this->chanceOutOfOne($loser, $winner)));
         return $this;
-    }
+    } // match
 
 
     /**
@@ -136,5 +136,5 @@ class Phelo
         }
         
         return abs(1/(1 + pow(10, ($this->players[$loser]-$this->players[$winner])/400)));
-    }
+    } // chanceOutOfOne
 } // Phelo
