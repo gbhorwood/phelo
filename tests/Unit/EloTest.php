@@ -17,7 +17,8 @@ class EloTest extends TestCase
             "Steve" => 1100,
             "Mahmoud" => 1200,
             "Joan" => 1300,
-            "白百柏" => 1400
+            "白百柏" => 1400,
+            "Barry Wang" => 2000
         ];
     
         $phelo = new \ghorwood\Phelo\Phelo();
@@ -26,6 +27,7 @@ class EloTest extends TestCase
             $phelo->$name = $elo;
             $this->assertEquals($phelo->$name, $elo);
         }
+
     }
 
     /**
@@ -40,7 +42,8 @@ class EloTest extends TestCase
             "Steve" => 1100,
             "Mahmoud" => 1200,
             "Joan" => 1300,
-            "白百柏" => 1400
+            "白百柏" => 1400,
+            "Barry Wang" => 2000
         ];
     
         $phelo = new \ghorwood\Phelo\Phelo();
