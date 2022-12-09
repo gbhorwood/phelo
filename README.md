@@ -1,4 +1,9 @@
 # Phelo
+[![License](http://poser.pugx.org/ghorwood/phelo/license)](https://packagist.org/packages/ghorwood/phelo)
+[![PHP Version Require](http://poser.pugx.org/ghorwood/phelo/require/php)](https://packagist.org/packages/ghorwood/phelo)
+[![Dependents](http://poser.pugx.org/ghorwood/phelo/dependents)](https://packagist.org/packages/ghorwood/phelo)
+[![Latest Stable Version](http://poser.pugx.org/ghorwood/phelo/v)](https://packagist.org/packages/ghorwood/phelo)
+
 Phelo is a simple library for managing the [elo rating system](https://en.wikipedia.org/wiki/Elo_rating_system).
 
 The elo system is a rating method used in chess and other comptetitive games to calculate an estimate of the strength of the player, based on his or her performance versus other players.
