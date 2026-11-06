@@ -110,8 +110,8 @@ class Phelo
             throw new \Exception("Invalid player $loser");
         }
         
-        $this->players[$winner] = round($this->players[$winner] + $this->k * (1 - $this->chanceOutOfOne($winner, $loser)));
-        $this->players[$loser] = round($this->players[$loser] + $this->k*(0 - $this->chanceOutOfOne($loser, $winner)));
+        $this->players[$winner] = (int) round($this->players[$winner] + $this->k * (1 - $this->chanceOutOfOne($winner, $loser)));
+        $this->players[$loser] = (int) round($this->players[$loser] + $this->k*(0 - $this->chanceOutOfOne($loser, $winner)));
         return $this;
     } // match
 
