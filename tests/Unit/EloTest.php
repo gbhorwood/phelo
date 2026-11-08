@@ -1,101 +1,81 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Tests\Unit;
 
+use ghorwood\Phelo\Phelo;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class EloTest extends TestCase
 {
+    private const array PLAYERS = [
+        "Jasminder" => 1000,
+        "Steve" => 1100,
+        "Mahmoud" => 1200,
+        "Joan" => 1300,
+        "白百柏" => 1400,
+        "Barry Wang" => 2000
+    ];
+
     /**
      * Test setting and getting
-     *
-     * @return void
      */
-    public function testSetGet()
+    #[Test]
+    public function setGet(): void
     {
-        $players = [
-            "Jasminder" => 1000,
-            "Steve" => 1100,
-            "Mahmoud" => 1200,
-            "Joan" => 1300,
-            "白百柏" => 1400,
-            "Barry Wang" => 2000
-        ];
-    
-        $phelo = new \ghorwood\Phelo\Phelo();
+        $phelo = new Phelo();
 
-        foreach ($players as $name => $elo) {
+        foreach (self::PLAYERS as $name => $elo) {
             $phelo->$name = $elo;
-            $this->assertEquals($phelo->$name, $elo);
+            $this->assertSame($elo, $phelo->$name);
         }
-
     }
 
     /**
      * Test getAll
-     *
-     * @return void
      */
-    public function testGetAll()
+    #[Test]
+    public function getAll(): void
     {
-        $players = [
-            "Jasminder" => 1000,
-            "Steve" => 1100,
-            "Mahmoud" => 1200,
-            "Joan" => 1300,
-            "白百柏" => 1400,
-            "Barry Wang" => 2000
-        ];
-    
-        $phelo = new \ghorwood\Phelo\Phelo();
+        $phelo = new Phelo();
 
-        foreach ($players as $name => $elo) {
+        foreach (self::PLAYERS as $name => $elo) {
             $phelo->$name = $elo;
         }
 
-        $all = $phelo->getAll();
-
-        foreach ($all as $name => $elo) {
-            $this->assertEquals($phelo->$name, $elo);
-        }
+        $this->assertSame(self::PLAYERS, $phelo->getAll());
     }
 
     /**
      * Test chance
-     *
-     * @return void
      */
-    public function testChance()
+    #[Test]
+    public function chance(): void
     {
-        $players = [
-            "Khalid" => 1000,
-            "Jerry" => 1000,
-            "Sigrid" => 910
-        ];
+        $phelo = new Phelo();
+        $phelo->Khalid = 1000;
+        $phelo->Jerry = 1000;
+        $phelo->Sigrid = 910;
 
-        $phelo = new \ghorwood\Phelo\Phelo();
-
-        foreach ($players as $player => $elo) {
-            $phelo->$player = $elo;
-        }
-
-        $this->assertEquals($phelo->chance("Khalid", "Jerry"), 50);
+        $this->assertSame(50.0, $phelo->chance("Khalid", "Jerry"));
 
         $chanceJerry = $phelo->chance("Jerry", "Sigrid");
         $chanceSigrid = $phelo->chance("Sigrid", "Jerry");
 
-        $this->assertEquals($chanceJerry, 62.67);
-        $this->assertEquals($chanceSigrid, 37.33);
-        $this->assertEquals($chanceJerry+$chanceSigrid, 100.00);
+        $this->assertSame(62.67, $chanceJerry);
+        $this->assertSame(37.33, $chanceSigrid);
+        $this->assertEqualsWithDelta(100.0, $chanceJerry + $chanceSigrid, 0.001);
     }
 
     /**
      * Test match, predicted elos with k 30, chaining
-     *
-     * @return void
      */
-    public function testMatch()
+    #[Test]
+    public function match(): void
     {
-        $phelo = new \ghorwood\Phelo\Phelo();
+        $phelo = new Phelo();
 
         $phelo->Tyrone = 1200;
         $phelo->Katarina = 800;
@@ -105,39 +85,51 @@ class EloTest extends TestCase
             ->match("Katarina", "Tyrone")
             ->match("Katarina", "Tyrone");
 
-        $this->assertEquals($phelo->Katarina, 902);
-        $this->assertEquals($phelo->Tyrone, 1099);
+        $this->assertSame(902, $phelo->Katarina);
+        $this->assertSame(1099, $phelo->Tyrone);
+        $this->assertSame(["Tyrone" => 1099, "Katarina" => 902], $phelo->getAll());
     }
 
     /**
      * Test setting non-positive elo fails
-     *
-     * @return void
      */
-    public function testSetFail()
+    #[Test]
+    public function setFail(): void
     {
-        $phelo = new \ghorwood\Phelo\Phelo();
+        $phelo = new Phelo();
 
-        try {
-            $phelo->fail = 0;
-        } catch (\Exception $e) {
-            $this->assertEquals("Elo must be positive", $e->getMessage());
-        }
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("Elo must be positive");
+
+        $phelo->fail = 0;
     }
 
     /**
-     * Test getting non-existant player
-     *
-     * @return void
+     * Test getting non-existent player
      */
-    public function testGetFail()
+    #[Test]
+    public function getFail(): void
     {
-        $phelo = new \ghorwood\Phelo\Phelo();
+        $phelo = new Phelo();
 
-        try {
-            $phelo->Nonexistant;
-        } catch (\Exception $e) {
-            $this->assertEquals("Invalid player Nonexistant", $e->getMessage());
-        }
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("Invalid player Nonexistant");
+
+        $phelo->Nonexistant;
+    }
+
+    /**
+     * Test match with non-existent player
+     */
+    #[Test]
+    public function matchFail(): void
+    {
+        $phelo = new Phelo();
+        $phelo->Tyrone = 1200;
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("Invalid player Nonexistant");
+
+        $phelo->match("Tyrone", "Nonexistant");
     }
 }
