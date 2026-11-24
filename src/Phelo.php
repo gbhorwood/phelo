@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace ghorwood\Phelo;
 
 /**
@@ -9,39 +12,34 @@ namespace ghorwood\Phelo;
 class Phelo
 {
     /**
-     * The k value used for calculating the elo score
-     */
-    private $k;
-
-    /**
      * The Array of players, keyed by name, value of elo score
+     *
+     * @var array<string, int>
      */
-    private $players = [];
+    private array $players = [];
 
 
     /**
      * Sets optional k value and constructs
      *
-     * @param Int $k The optional k value used to calculate elo, default 30
+     * @param int $k The optional k value used to calculate elo, default 30
      */
-    public function __construct(int $k=30)
+    public function __construct(private readonly int $k = 30)
     {
-        $this->k = $k;
     } // __construct
 
 
     /**
      * Creates a player by name with an optional elo. Default elo 1000.
      *
-     * @param String $player The name of the player
-     * @param Int $elo The initial elo of the player. Must be positive.
-     * @return void
-     * @throws \Exception Elo must be positive
+     * @param string $player The name of the player
+     * @param int $elo The initial elo of the player. Must be positive.
+     * @throws \InvalidArgumentException Elo must be positive
      */
-    public function __set(String $player, int $elo=1000)
+    public function __set(string $player, int $elo = 1000): void
     {
         if ($elo < 1) {
-            throw new \Exception("Elo must be positive");
+            throw new \InvalidArgumentException("Elo must be positive");
         }
         $this->players[$player] = $elo;
     } // __set
@@ -50,15 +48,13 @@ class Phelo
     /**
      * Returns The elo score of the player $player
      *
-     * @param String $player The name of the player
-     * @return Int The elo of player $player
-     * @throws \Exception Invalid player
+     * @param string $player The name of the player
+     * @return int The elo of player $player
+     * @throws \InvalidArgumentException Invalid player
      */
-    public function __get(String $player):int
+    public function __get(string $player): int
     {
-        if (!isset($this->players[$player])) {
-            throw new \Exception("Invalid player $player");
-        }
+        $this->assertPlayer($player);
         return $this->players[$player];
     } // __get
 
@@ -66,9 +62,9 @@ class Phelo
     /**
      * Returns array of all players, keyed by name with value of elo.
      *
-     * @return Array All players with their elos
+     * @return array<string, int> All players with their elos
      */
-    public function getAll():array
+    public function getAll(): array
     {
         return $this->players;
     } // getAll
@@ -78,14 +74,15 @@ class Phelo
      * Returns the chance of player $winner beating player $loser as
      * a percentage to decimal places.
      *
-     * @param String $winner The name of the winning player
-     * @param String $loser The name of the losing player
-     * @return Float The chance that $winner has of beating $loser
-     * @throws \Exception Invalid player
+     * @param string $winner The name of the winning player
+     * @param string $loser The name of the losing player
+     * @return float The chance that $winner has of beating $loser
+     * @throws \InvalidArgumentException Invalid player
      */
-    public function chance(string $winner, string $loser):float
+    #[\NoDiscard]
+    public function chance(string $winner, string $loser): float
     {
-        return floatval(sprintf("%.2f", $this->chanceOutOfOne($winner, $loser) * 100));
+        return round($this->chanceOutOfOne($winner, $loser) * 100, 2);
     } // chance
 
 
@@ -95,23 +92,14 @@ class Phelo
      *
      * This method is chainable.
      *
-     * @param String $winner The name of the winning player
-     * @param String $loser The name of the losing player
-     * @return Phelo
-     * @throws \Exception Invalid player
+     * @param string $winner The name of the winning player
+     * @param string $loser The name of the losing player
+     * @throws \InvalidArgumentException Invalid player
      */
-    public function match(string $winner, string $loser):Phelo
+    public function match(string $winner, string $loser): static
     {
-        if (!isset($this->players[$winner])) {
-            throw new \Exception("Invalid player $winner");
-        }
-
-        if (!isset($this->players[$loser])) {
-            throw new \Exception("Invalid player $loser");
-        }
-        
-        $this->players[$winner] = round($this->players[$winner] + $this->k * (1 - $this->chanceOutOfOne($winner, $loser)));
-        $this->players[$loser] = round($this->players[$loser] + $this->k*(0 - $this->chanceOutOfOne($loser, $winner)));
+        $this->players[$winner] = (int) round($this->players[$winner] + $this->k * (1 - $this->chanceOutOfOne($winner, $loser)));
+        $this->players[$loser] = (int) round($this->players[$loser] + $this->k * (0 - $this->chanceOutOfOne($loser, $winner)));
         return $this;
     } // match
 
@@ -120,21 +108,30 @@ class Phelo
      * Calculates the chance that player $winner has of beating player $loser
      * as a float between 0 and 1. Used by match() to calculate elo.
      *
-     * @param String $winner The name of the winning player
-     * @param String $loser The name of the losing player
-     * @return Float The chance that $winner has of beating $loser
-     * @throws \Exception Invalid player
+     * @param string $winner The name of the winning player
+     * @param string $loser The name of the losing player
+     * @return float The chance that $winner has of beating $loser
+     * @throws \InvalidArgumentException Invalid player
      */
-    private function chanceOutOfOne(string $winner, string $loser):float
+    private function chanceOutOfOne(string $winner, string $loser): float
     {
-        if (!isset($this->players[$winner])) {
-            throw new \Exception("Invalid player $winner");
-        }
+        $this->assertPlayer($winner);
+        $this->assertPlayer($loser);
 
-        if (!isset($this->players[$loser])) {
-            throw new \Exception("Invalid player $loser");
-        }
-        
-        return abs(1/(1 + pow(10, ($this->players[$loser]-$this->players[$winner])/400)));
+        return 1 / (1 + 10 ** (($this->players[$loser] - $this->players[$winner]) / 400));
     } // chanceOutOfOne
+
+
+    /**
+     * Throws if player $player does not exist.
+     *
+     * @param string $player The name of the player
+     * @throws \InvalidArgumentException Invalid player
+     */
+    private function assertPlayer(string $player): void
+    {
+        if (!isset($this->players[$player])) {
+            throw new \InvalidArgumentException("Invalid player $player");
+        }
+    } // assertPlayer
 } // Phelo
